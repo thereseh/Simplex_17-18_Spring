@@ -6,13 +6,13 @@ Date: 2017/05
 #define __MYMESH_H_
 
 //#define USEBASICX
-//#ifdef USEBASICX
-//#include "BasicX\BasicX.h"
-//using namespace BasicX;
-//#else
+#ifdef USEBASICX
+#include "BasicX\BasicX.h"
+using namespace BasicX;
+#else
 #include "Simplex\Simplex.h"
 using namespace Simplex;
-//#endif // USEBASICX
+#endif // USEBASICX
 
 #include "SFML\Window.hpp"
 #include "SFML\Graphics.hpp"
