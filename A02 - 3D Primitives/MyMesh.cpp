@@ -272,11 +272,41 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	if (a_nSubdivisions > 360)
 		a_nSubdivisions = 360;
 
+
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
+	
+	float f_curr_vertex = 0;
+	float f_next_vertex = 0;
+	float f_half_height = a_fHeight * 0.5f;
+
+	for (int i = 0; i <= a_nSubdivisions; i++) {
+		f_curr_vertex = (i / (float)a_nSubdivisions) * PI * 2;
+		f_next_vertex = (i + 1) / (float)a_nSubdivisions * PI * 2;
+
+		// Sides
+		vector3 point1(cos(f_curr_vertex) * a_fRadius, -f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point2(cos(f_next_vertex) * a_fRadius, -f_half_height, sin(f_next_vertex) * a_fRadius);
+		vector3 point3(0, f_half_height, 0);
+
+		// Bottom
+		vector3 point4(cos(f_curr_vertex) * a_fRadius, -f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point5(cos(f_next_vertex) * a_fRadius, -f_half_height, sin(f_next_vertex) * a_fRadius);
+		vector3 point6(0, -f_half_height, 0);
+
+		// Front
+		AddTri(point1, point2, point3);
+
+		// Back
+		AddTri(point2, point1, point3);
+
+		// Bottom
+		AddTri(point4, point5, point6);
+	}
+
+
+
 	// -------------------------------
 
 	// Adding information about color
@@ -299,9 +329,47 @@ void MyMesh::GenerateCylinder(float a_fRadius, float a_fHeight, int a_nSubdivisi
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+
+	float f_curr_vertex = 0;
+	float f_next_vertex = 0;
+	float f_half_height = a_fHeight * 0.5f;
+
+	for (int i = 0; i <= a_nSubdivisions; i++) {
+		f_curr_vertex = (i / (float)a_nSubdivisions) * PI * 2;
+		f_next_vertex = (i + 1) / (float)a_nSubdivisions * PI * 2;
+
+		// Sides
+		vector3 point0(cos(f_curr_vertex) * a_fRadius, -f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point1(cos(f_next_vertex) * a_fRadius, -f_half_height, sin(f_next_vertex) * a_fRadius);
+		vector3 point2(cos(f_curr_vertex) * a_fRadius, f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point3(cos(f_next_vertex) * a_fRadius, f_half_height, sin(f_next_vertex) * a_fRadius);
+
+		// Bottom
+		vector3 point4(cos(f_curr_vertex) * a_fRadius, -f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point5(cos(f_next_vertex) * a_fRadius, -f_half_height, sin(f_next_vertex) * a_fRadius);
+		vector3 point6(0, -f_half_height, 0);
+
+		// Top
+		vector3 point7(cos(f_curr_vertex) * a_fRadius, f_half_height, sin(f_curr_vertex) * a_fRadius);
+		vector3 point8(cos(f_next_vertex) * a_fRadius, f_half_height, sin(f_next_vertex) * a_fRadius);
+		vector3 point9(0, f_half_height, 0);
+
+
+		// Front
+		AddQuad(point0, point1, point3, point2);
+
+		// Back
+		AddQuad(point1, point0, point2, point3);
+
+		// Bottom
+		AddTri(point4, point5, point6);
+
+		// Top
+		AddTri(point8, point7, point9);
+
+	}
+
+
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -329,9 +397,43 @@ void MyMesh::GenerateTube(float a_fOuterRadius, float a_fInnerRadius, float a_fH
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	float f_curr_vertex = 0;
+	float f_next_vertex = 0;
+	float f_half_height = a_fHeight * 0.5f;
+
+	for (int i = 0; i < a_nSubdivisions; i++) {
+		f_curr_vertex = (i / (float)a_nSubdivisions) * PI * 2;
+		f_next_vertex = (i + 1) / (float)a_nSubdivisions * PI * 2;
+
+		// Outer Sides
+		vector3 v_outer_point0(cos(f_curr_vertex) * a_fOuterRadius, -f_half_height, sin(f_curr_vertex) * a_fOuterRadius);
+		vector3 v_outer_point1(cos(f_next_vertex) * a_fOuterRadius, -f_half_height, sin(f_next_vertex) * a_fOuterRadius);
+		vector3 v_outer_point2(cos(f_next_vertex) * a_fOuterRadius, f_half_height, sin(f_next_vertex) * a_fOuterRadius);
+		vector3 v_outer_point3(cos(f_curr_vertex) * a_fOuterRadius, f_half_height, sin(f_curr_vertex) * a_fOuterRadius);
+
+
+		// Inner Sides
+		vector3 v_inner_point0(cos(f_curr_vertex) * a_fInnerRadius, -f_half_height, sin(f_curr_vertex) * a_fInnerRadius);
+		vector3 v_inner_point1(cos(f_next_vertex) * a_fInnerRadius, -f_half_height, sin(f_next_vertex) * a_fInnerRadius);
+		vector3 v_inner_point2(cos(f_next_vertex) * a_fInnerRadius, f_half_height, sin(f_next_vertex) * a_fInnerRadius);
+		vector3 v_inner_point3(cos(f_curr_vertex) * a_fInnerRadius, f_half_height, sin(f_curr_vertex) * a_fInnerRadius);
+
+		// Front
+		AddQuad(v_outer_point0, v_outer_point1, v_outer_point3, v_outer_point2);
+		AddQuad(v_inner_point0, v_inner_point1, v_inner_point3, v_inner_point2);
+
+		// Back
+		AddQuad(v_outer_point1, v_outer_point0, v_outer_point2, v_outer_point3);
+		AddQuad(v_inner_point1, v_inner_point0, v_inner_point2, v_inner_point3);
+		
+		// Top
+		AddQuad(v_outer_point2, v_outer_point3, v_inner_point2, v_inner_point3);
+		AddQuad(v_outer_point3, v_outer_point2, v_inner_point3, v_inner_point2);
+
+		// Bottom
+		AddQuad(v_outer_point0, v_outer_point1, v_inner_point0, v_inner_point1);
+		AddQuad(v_outer_point1, v_outer_point0, v_inner_point1, v_inner_point2);
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -361,9 +463,51 @@ void MyMesh::GenerateTorus(float a_fOuterRadius, float a_fInnerRadius, int a_nSu
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fOuterRadius * 2.0f, a_v3Color);
-	// -------------------------------
+
+	float f_curr_vertex = 0;
+	float f_next_vertex = 0;
+	float f_curr_radians = 0;
+	float f_next_radians = 0;
+
+	float f_center_tube = (a_fOuterRadius - a_fInnerRadius) * 0.5f;
+	float f_outer_radius = a_fOuterRadius - f_center_tube;
+
+	for (int i = 0; i < a_nSubdivisionsA; i++) {
+		f_curr_radians = (i / (float)a_nSubdivisionsA) * PI * 2;
+		f_next_radians = ((i + 1) / (float)a_nSubdivisionsA) * PI * 2;
+
+
+		for (int j = 0; j < a_nSubdivisionsB; j++) {
+			f_curr_vertex = (j / (float)a_nSubdivisionsB) * PI * 2;
+			f_next_vertex = ((j + 1) / (float)a_nSubdivisionsB) * PI * 2;
+
+
+			// curr radians + curr vertex (bottom left)
+			vector3 point0((f_outer_radius + f_center_tube * cos(f_curr_vertex)) * cos(f_curr_radians),
+				f_center_tube * sin(f_curr_vertex),
+				(f_outer_radius + f_center_tube * cos(f_curr_vertex)) * sin(f_curr_radians));
+
+			// next radians + curr vertex (bottom right)
+			vector3 point1((f_outer_radius + f_center_tube * cos(f_curr_vertex)) * cos(f_next_radians),
+				f_center_tube * sin(f_curr_vertex),
+				(f_outer_radius + f_center_tube * cos(f_curr_vertex)) * sin(f_next_radians));
+
+			// curr radians + next vertex (top left)
+			vector3 point2((f_outer_radius + f_center_tube * cos(f_next_vertex)) * cos(f_curr_radians),
+				f_center_tube * sin(f_next_vertex),
+				(f_outer_radius + f_center_tube * cos(f_next_vertex)) * sin(f_curr_radians));
+
+			// next radians + next vertex (top right)
+			vector3 point3((f_outer_radius + f_center_tube * cos(f_next_vertex)) * cos(f_next_radians),
+				f_center_tube * sin(f_next_vertex),
+				(f_outer_radius + f_center_tube * cos(f_next_vertex)) * sin(f_next_radians));
+			
+			AddQuad(point0, point1, point3, point2);
+			AddQuad(point1, point0, point2, point3);
+
+		}
+
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
@@ -386,9 +530,34 @@ void MyMesh::GenerateSphere(float a_fRadius, int a_nSubdivisions, vector3 a_v3Co
 	Release();
 	Init();
 
-	// Replace this with your code
-	GenerateCube(a_fRadius * 2.0f, a_v3Color);
-	// -------------------------------
+	// Multiply by 2 to make it more round, I'm a cheeta
+	float f_half_circle = PI / (a_nSubdivisions * 2 );
+
+	for (float i = 0; i <= 2 * PI; i += f_half_circle)
+	{
+		for (float j = 0; j <= PI; j += f_half_circle)
+		{
+
+			vector3 point0(a_fRadius * sin(j + f_half_circle) * sin(i),
+				a_fRadius * cos(j + f_half_circle),
+				a_fRadius * sin(j + f_half_circle) * cos(i));
+
+			vector3 point1(a_fRadius * sin(j + f_half_circle) * sin(i + f_half_circle),
+				a_fRadius * cos(j + f_half_circle),
+				a_fRadius * sin(j + f_half_circle) * cos(i + f_half_circle));
+
+			vector3 point2(a_fRadius * sin(j) * sin(i + f_half_circle),
+				a_fRadius * cos(j),
+				a_fRadius * sin(j) * cos(i + f_half_circle));
+
+			vector3 point3(a_fRadius * sin(j) * sin(i),
+				a_fRadius * cos(j),
+				a_fRadius * sin(j) * cos(i));
+
+			AddQuad(point0, point1, point3, point2);
+			AddQuad(point1, point2, point2, point3);
+		}
+	}
 
 	// Adding information about color
 	CompleteMesh(a_v3Color);
