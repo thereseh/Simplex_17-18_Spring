@@ -2,7 +2,7 @@
 void Application::InitVariables(void)
 {
 	//Change this to your name and email
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu";
+	m_sProgrammer = "Therese Henriksson - tah5279@rit.edu";
 
 	//Set the position and target of the camera
 	m_pCameraMngr->SetPositionTargetAndUp(vector3(5.0f,3.0f,15.0f), ZERO_V3, AXIS_Y);
@@ -51,21 +51,43 @@ void Application::Display(void)
 	static uint uClock = m_pSystem->GenClock(); //generate a new clock for that timer
 	fTimer += m_pSystem->GetDeltaTime(uClock); //get the delta time for that timer
 
+	//your code goes here
+	static int i_index = 0;
+	static float f_percentage = 0;
+	float f_totalTimeSec = 2.0;
+
 	//calculate the current position
 	vector3 v3CurrentPos;
-	
+	vector3 v3Begin = m_stopsList[i_index];
+	vector3 v3End;
 
+	if (i_index == m_stopsList.size() - 1) {
+		v3End = m_stopsList[0];
+	} else {
+		v3End = m_stopsList[i_index + 1];
+	}
 
+	f_percentage = MapValue(fTimer, 0.0f, f_totalTimeSec, 0.0f, 1.0f);
 
-
-	//your code goes here
-	v3CurrentPos = vector3(0.0f, 0.0f, 0.0f);
-	//-------------------
-	
-
-
-	
+	v3CurrentPos = glm::lerp(v3Begin, v3End, f_percentage);
 	matrix4 m4Model = glm::translate(v3CurrentPos);
+
+
+	if (f_percentage >= 1.0f) {
+		i_index++;
+
+		fTimer = m_pSystem->GetDeltaTime(uClock);
+
+		if (i_index == m_stopsList.size()) {
+			i_index = 0;
+		}
+	}
+
+
+
+	//-------------------
+
+
 	m_pModel->SetModelMatrix(m4Model);
 
 	m_pMeshMngr->Print("\nTimer: ");//Add a line on top
