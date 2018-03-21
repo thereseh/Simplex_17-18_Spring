@@ -9,12 +9,15 @@ void Application::InitVariables(void)
 	//(I'm at [0,0,10], looking at [0,0,0] and up is the positive Y axis)
 	m_pCameraMngr->SetPositionTargetAndUp(AXIS_Z * 10.0f, ZERO_V3, AXIS_Y);
 
+	// init the up vector
+	m_v3UpVector = AXIS_Y;
+	
 	//init the camera
 	m_pCamera = new MyCamera();
 	m_pCamera->SetPositionTargetAndUp(
 			vector3(0.0f, 3.0f, 20.0f), //Where my eyes are
 			vector3(0.0f, 3.0f, 19.0f), //where what I'm looking at is
-			AXIS_Y);					//what is up
+			m_v3UpVector);					//what is up
 
 	//Get the singleton
 	m_pMyMeshMngr = MyMeshManager::GetInstance();
@@ -70,7 +73,7 @@ void Application::Display(void)
 	m_pCamera->SetPositionTargetAndUp(
 		m_v3NewCameraPosition, //Where my eyes are
 		m_v3NewTargetToLookAt, //where what I'm looking at is
-		AXIS_Y);			   //what is up
+		m_v3UpVector);			   //what is up
 
 	//clear the render list
 	m_pMeshMngr->ClearRenderList();

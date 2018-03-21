@@ -380,6 +380,10 @@ void Application::CameraRotation(float a_fSpeed)
 	// multiply the camera quat with the new rotation quat
 	m_qRotateCamera = m_qRotation * m_qRotateCamera;
 
+	// update the UP vector, my code worked fine without this, but discussion on discord indicated that it was needed
+	// soooo here it is
+	m_v3UpVector = m_qRotation * m_v3UpVector;
+
 	//Change the Yaw and the Pitch of the camera
 	SetCursorPos(CenterX, CenterY);//Position the mouse in the center
 }

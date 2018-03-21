@@ -27,6 +27,7 @@ class Application
 
 	// rotate camera
 	float m_fCameraRotateSpeed = 0.2f;
+	vector3 m_v3UpVector = vector3();
 	glm::quat m_qRotateCamera = glm::quat(vector3());
 
 
