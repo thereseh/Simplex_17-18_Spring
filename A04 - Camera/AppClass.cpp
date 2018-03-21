@@ -53,7 +53,7 @@ void Application::Display(void)
 	// if key is pressed to move camera, multiply with speed
 	vector3 m_v3MoveCamera = m_v3MoveKeyPress * m_fMoveSpeed;
 
-	// multiply rotation to the new move direction
+	// multiply the new move direction with rotation
 	m_v3MoveCamera = m_qRotateCamera * m_v3MoveCamera;
 	
 	// calculate new position

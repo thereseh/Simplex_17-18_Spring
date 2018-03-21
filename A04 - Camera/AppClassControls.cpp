@@ -395,6 +395,7 @@ void Application::ProcessKeyboard(void)
 	float fMultiplier = sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) ||
 		sf::Keyboard::isKeyPressed(sf::Keyboard::RShift);
 
+	// check keypress to move camera
 	m_v3MoveKeyPress = vector3();
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
