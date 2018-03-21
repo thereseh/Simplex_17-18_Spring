@@ -13,9 +13,32 @@ void Application::Display(void)
 #pragma endregion
 	//Your code goes here ---------------------------------------------------------
 	
-	m_sProgrammer = "Alberto Bobadilla - labigm@rit.edu"; //Replace with your name and email
-	vector3 v3CurrentPos; //Initialize this variable accordingly
+	m_sProgrammer = "Therese Henriksson - tah5279@rit.edu"; //Replace with your name and email
+
+	static uint route = 0;
+	static float f_percentage = 0;
+	float f_totalTimeSec = 2.0f;
+
+	vector3 v3Begin = m_v3StopList[route % m_v3StopList.size()];
+	vector3 v3End = m_v3StopList[(route + 1) % m_v3StopList.size()];
+
+	// get percentage traveled, so we can maintain same time traveled between all stops
+	f_percentage = MapValue(fTimer, 0.0f, f_totalTimeSec, 0.0f, 1.0f);
+
+	// get current position by lerping between two postions
+	vector3 v3CurrentPos = glm::lerp(v3Begin, v3End, f_percentage); 
+
+	if (f_percentage >= 1.0f) {
+
+		// restart timer
+		fTimer = m_pSystem->GetDeltaTime(uClock);
+
+		route++;
+	}
+
 	matrix4 m4Model = glm::translate(IDENTITY_M4, v3CurrentPos) * ToMatrix4(m_qArcBall);
+
+
 	
 	
 	//---------------------------------------------------------

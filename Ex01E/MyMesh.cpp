@@ -20,9 +20,32 @@ void MyMesh::GenerateCone(float a_fRadius, float a_fHeight, int a_nSubdivisions,
 	// Replace this with your code:
 	//-------------------------------------------------------------------
 
+	float f_curr_vertex = 0;
+	float f_next_vertex = 0;
 
+	for (uint i = 0; i <= a_nSubdivisions; i++) {
+		f_curr_vertex = (i / (float)a_nSubdivisions) * PI * 2;
+		f_next_vertex = (i + 1) / (float)a_nSubdivisions * PI * 2;
 
-	GenerateCube(a_fRadius, C_RED); //Remember AddTri and AddVertexPosition are your friends. 
+		// Sides
+		vector3 point1(cos(f_curr_vertex) * a_fRadius, 0, sin(f_curr_vertex) * a_fRadius);
+		vector3 point2(cos(f_next_vertex) * a_fRadius, 0, sin(f_next_vertex) * a_fRadius);
+		vector3 point3(0, -a_fHeight, 0);
+
+		// Bottom
+		vector3 point4(cos(f_curr_vertex) * a_fRadius, 0, sin(f_curr_vertex) * a_fRadius);
+		vector3 point5(cos(f_next_vertex) * a_fRadius, 0, sin(f_next_vertex) * a_fRadius);
+		vector3 point6(0, 0, 0);
+
+		// Front
+		AddTri(point1, point2, point3);
+
+		// Back
+		AddTri(point2, point1, point3);
+
+		// Bottom
+		AddTri(point5, point4, point6);
+	}
 
 
 
