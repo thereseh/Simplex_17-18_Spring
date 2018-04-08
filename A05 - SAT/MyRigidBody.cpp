@@ -247,7 +247,7 @@ bool MyRigidBody::IsColliding(MyRigidBody* const a_pOther)
 		a_pOther->RemoveCollisionWith(this);
 	}
 
-	return bColliding;
+return bColliding;
 }
 void MyRigidBody::AddToRenderList(void)
 {
@@ -286,6 +286,122 @@ uint MyRigidBody::SAT(MyRigidBody* const a_pOther)
 	Simplex that might help you [eSATResults] feel free to use it.
 	(eSATResults::SAT_NONE has a value of 0)
 	*/
+
+	
+	// R & AbsR in "The Orange Book"
+	matrix4 m_m4Rotation = matrix4();
+	matrix4 m_m4Rotation_Abs = matrix4();
+
+	// ra & rb in "The Orange Book"
+	float m_fRadius_current;
+	float m_fRadius_other;
+
+	// translate the axes of "this" object from world to local
+	vector3 m_v3LocalAxes_current[3];
+	m_v3LocalAxes_current[0] = vector3(m_m4ToWorld * vector4(AXIS_X, 0));
+	m_v3LocalAxes_current[1] = vector3(m_m4ToWorld * vector4(AXIS_Y, 0));
+	m_v3LocalAxes_current[2] = vector3(m_m4ToWorld * vector4(AXIS_Z, 0));
+
+	// translate the axes of the "other" object from world to local
+	vector3 m_v3LocalAxes_other[3];
+	m_v3LocalAxes_other[0] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_X, 0));
+	m_v3LocalAxes_other[1] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_Y, 0));
+	m_v3LocalAxes_other[2] = vector3(a_pOther->m_m4ToWorld * vector4(AXIS_Z, 0));
+
+	// get rotation matrix by taking the dot product of each axis of the two objects
+	// "compute rotation matrix expressing b in a's coordinate frame"
+	for (uint i = 0; i < 3; i++) 
+	{
+		for (uint j = 0; j < 3; j++) 
+		{
+			m_m4Rotation[i][j] = glm::dot(m_v3LocalAxes_current[i], m_v3LocalAxes_other[j]);
+		}
+	} 
+
+	// compute the translation vector
+	vector4 m_v4Translation = (a_pOther->m_m4ToWorld * vector4(a_pOther->m_v3Center, 1)) - (m_m4ToWorld * vector4(m_v3Center, 1));
+
+	// "Bring the translation into a's coordinate frame"
+	m_v4Translation = vector4(glm::dot(m_v4Translation, m_m4ToWorld[0]), glm::dot(m_v4Translation, m_m4ToWorld[1]), glm::dot(m_v4Translation, m_m4ToWorld[2]), 1);
+
+	// "Compute common subexpression" whatever that means
+	for (uint i = 0; i < 3; i++) {
+		for (uint j = 0; j < 3; j++) {
+			m_m4Rotation_Abs[i][j] = glm::abs(m_m4Rotation[i][j]);
+		}
+	}
+
+	// Test all the axes
+
+	// A0, A1, A2
+	for (uint i = 0; i < 3; i++) {
+		m_fRadius_current = m_v3HalfWidth[i];
+		m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[i][0] + a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[i][1] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[i][2];
+
+		if (glm::abs(m_v4Translation[i]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AX;
+	}
+
+	// B0, B1, B2
+	for (uint i = 0; i < 3; i++) {
+		m_fRadius_other = a_pOther->m_v3HalfWidth[i];
+		m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[0][i] + m_v3HalfWidth[1] * m_m4Rotation_Abs[1][i] + m_v3HalfWidth[2] * m_m4Rotation_Abs[2][i];
+
+		if (glm::abs(m_v4Translation[0]) * m_m4Rotation[0][i] + m_v4Translation[1] * m_m4Rotation[1][i] + m_v4Translation[2] * m_m4Rotation[2][i] > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_BX;
+	}
+
+	// A0 x B0
+	m_fRadius_current = m_v3HalfWidth[1] * m_m4Rotation_Abs[2][0] + m_v3HalfWidth[2] * m_m4Rotation_Abs[1][0];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[0][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[0][1];
+
+	if (glm::abs(m_v4Translation[2] * m_m4Rotation[1][0] - m_v4Translation[1] * m_m4Rotation[2][0]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AXxBX;
+
+	// A0 x B1
+	m_fRadius_current = m_v3HalfWidth[1] * m_m4Rotation_Abs[2][1] + m_v3HalfWidth[2] * m_m4Rotation_Abs[1][1];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[0][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[0][0];
+
+	if (glm::abs(m_v4Translation[2] * m_m4Rotation[1][1] - m_v4Translation[1] * m_m4Rotation[2][1]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AXxBY;
+
+	// A0 x B2
+	m_fRadius_current = m_v3HalfWidth[1] * m_m4Rotation_Abs[2][2] + m_v3HalfWidth[2] * m_m4Rotation_Abs[1][2];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[0][1] + a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[0][0];
+
+	if (glm::abs(m_v4Translation[2] * m_m4Rotation[1][2] - m_v4Translation[1] * m_m4Rotation[2][2]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AXxBZ;
+
+	// A1 x B0
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[2][0] + m_v3HalfWidth[2] * m_m4Rotation_Abs[0][0];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[1][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[1][1];
+
+	if (glm::abs(m_v4Translation[2] * m_m4Rotation[2][0] - m_v4Translation[2] * m_m4Rotation[0][0]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AYxBX;
+
+	// A1 x B1
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[2][1] + m_v3HalfWidth[2] * m_m4Rotation_Abs[0][1];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[1][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[1][0];
+
+	if (glm::abs(m_v4Translation[0] * m_m4Rotation[2][1] - m_v4Translation[2] * m_m4Rotation[0][1]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AYxBY;
+
+	// A1 x B2
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[2][2] + m_v3HalfWidth[2] * m_m4Rotation_Abs[0][2];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[1][1] + a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[1][0];
+
+	if (glm::abs(m_v4Translation[0] * m_m4Rotation[2][2] - m_v4Translation[2] * m_m4Rotation[0][2]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AYxBZ;
+
+	// A2 x B0
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[1][0] + m_v3HalfWidth[1] * m_m4Rotation_Abs[0][0];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[2][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[2][1];
+
+	if (glm::abs(m_v4Translation[1] * m_m4Rotation[0][0] - m_v4Translation[0] * m_m4Rotation[1][0]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AZxBX;
+
+	// A2 x B1
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[1][1] + m_v3HalfWidth[1] * m_m4Rotation_Abs[0][1];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[2][2] + a_pOther->m_v3HalfWidth[2] * m_m4Rotation_Abs[2][0];
+
+	if (glm::abs(m_v4Translation[1] * m_m4Rotation[0][1] - m_v4Translation[0] * m_m4Rotation[1][1]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AZxBY;
+
+	// A2 x B2
+	m_fRadius_current = m_v3HalfWidth[0] * m_m4Rotation_Abs[1][2] + m_v3HalfWidth[1] * m_m4Rotation_Abs[0][2];
+	m_fRadius_other = a_pOther->m_v3HalfWidth[0] * m_m4Rotation_Abs[2][1] + a_pOther->m_v3HalfWidth[1] * m_m4Rotation_Abs[2][0];
+
+	if (glm::abs(m_v4Translation[1] * m_m4Rotation[0][2] - m_v4Translation[0] * m_m4Rotation[1][2]) > m_fRadius_current + m_fRadius_other) return eSATResults::SAT_AZxBZ;
 
 	//there is no axis test that separates this two objects
 	return eSATResults::SAT_NONE;
