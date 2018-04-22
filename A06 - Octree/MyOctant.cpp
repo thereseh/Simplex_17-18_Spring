@@ -33,7 +33,7 @@ Simplex::MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 		vector3 v3TempMin = m_pEntityMngr->GetRigidBody(i)->GetMinGlobal();
 		vector3 v3TempMax = m_pEntityMngr->GetRigidBody(i)->GetMaxGlobal();
 
-		// find all 4 sides
+		// find all 6 sides
 		if (v3TempMin.x < m_v3Min.x) m_v3Min.x = v3TempMin.x;
 		if (v3TempMax.x > m_v3Max.x) m_v3Max.x = v3TempMax.x;
 		if (v3TempMin.y < m_v3Min.y) m_v3Min.y = v3TempMin.y;
@@ -43,7 +43,7 @@ Simplex::MyOctant::MyOctant(uint a_nMaxLevel, uint a_nIdealEntityCount)
 	}
 
 	// find center value
-	m_v3Center = (m_v3Min + m_v3Max) / 2.f;
+	m_v3Center = (m_v3Min + m_v3Max) / 2.0f;
 
 	// find size of object
 	m_fSize = m_v3Max.x - m_v3Min.x;
@@ -377,7 +377,7 @@ void Simplex::MyOctant::Release(void)
 
 void Simplex::MyOctant::Init(void)
 {
-	// initializes managers
+	// initialize managers
 	m_pEntityMngr = MyEntityManager::GetInstance();
 	m_pMeshMngr = MeshManager::GetInstance();
 
